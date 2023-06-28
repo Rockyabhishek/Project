@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>css</title>
+    <style>
+        .box
+        {
+            height: 200px;
+            width: 200px;
+            background-color: aqua;
+            border-radius: 50%;
+            box-shadow: 0px 0px 10px yellow;
+            text-align: center;
+            text-shadow: 0px 0px 10px;
+            line-height: 200px;
+            font-size: 30px;
+            float: left;
+        }
+        .box1{
+            height: 200px;
+            width: 200px;
+            background-color:gold ;
+            border-top-right-radius: 50px;
+            float: left;
+            text-align: center;
+            line-height: 200px;
+        }
+        .box2{
+            height: 200px;
+            width: 200px;
+            background-color:red ;
+            border-top-right-radius: 50px;
+            float: left;
+            text-align: center;
+            line-height: 200px;
+            animation-name: Abhi;
+            animation-duration: 5s;
+            animation-iteration-count: infinite;
+        }
+        @keyframes Abhi{
+            from{background-color: aquamarine;}
+            to{background-color: blue; color: aliceblue;font-size: 30px;}
+        }
+        .common{
+            height: 200px;
+            width: 200px;
+            border: solid 1px red;
+            float: left;
+        }
+        #rotate:hover{
+            transition: 3s;
+            transform: rotate(360deg);
+        }
+        #skew:hover{
+            transition: 3s;
+            transform: skew(40deg,50deg);
+        }
+        #scale:hover{
+            transition: 3s;
+            transform: scale(2,2);
+        }
+        #translate:hover{
+            transition: 3s;
+            transform: translate(40px,20px);
+        }
+        .rgba{
+            background-color: rgba(242,24,24,0.5);
+        }
+        .lg{
+            background: linear-gradient(
+                40deg,
+                rgba(15,37,110,1)12%,
+                rgba(32,178,7,1)55%,
+                rgba(0,0,0,1)76%
+            );
+        }
+        .rg{
+            background: radial-gradient(
+                81% 95% at 49% 49%,
+                rgba(240,242,250,1))12%,
+                rgba(32,178,7,1)84%
+               
+            );
+        }
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+    <div class="box1">single</div>
+    <div class="box2">Animation</div>
+    <div class="common">rotate
+        <img src="images/insta.png"width="200px" height="180" id="rotate">
+    </div>
+    <div class="common">skew
+        <img src="images/wtsapp.png"width="200px" height="180" id="skew">
+    </div>
+    <div class="common">scale
+        <img src="images/wtsapp.png"width="200px" height="180" id="scale">
+    </div>
+    <div class="common">translate
+        <img src="images/wtsapp.png"width="200px" height="180" id="translate">
+    </div>
+    <div class="common rgba">rgba</div>
+    <div class="common rgba">rgba</div>
+    <div class="common rgba">rgba</div>
+</body>
+</html>

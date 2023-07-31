@@ -1,110 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>css</title>
-    <style>
-        .box
-        {
-            height: 200px;
-            width: 200px;
-            background-color: aqua;
-            border-radius: 50%;
-            box-shadow: 0px 0px 10px yellow;
-            text-align: center;
-            text-shadow: 0px 0px 10px;
-            line-height: 200px;
-            font-size: 30px;
-            float: left;
-        }
-        .box1{
-            height: 200px;
-            width: 200px;
-            background-color:gold ;
-            border-top-right-radius: 50px;
-            float: left;
-            text-align: center;
-            line-height: 200px;
-        }
-        .box2{
-            height: 200px;
-            width: 200px;
-            background-color:red ;
-            border-top-right-radius: 50px;
-            float: left;
-            text-align: center;
-            line-height: 200px;
-            animation-name: Abhi;
-            animation-duration: 5s;
-            animation-iteration-count: infinite;
-        }
-        @keyframes Abhi{
-            from{background-color: aquamarine;}
-            to{background-color: blue; color: aliceblue;font-size: 30px;}
-        }
-        .common{
-            height: 200px;
-            width: 200px;
-            border: solid 1px red;
-            float: left;
-        }
-        #rotate:hover{
-            transition: 3s;
-            transform: rotate(360deg);
-        }
-        #skew:hover{
-            transition: 3s;
-            transform: skew(40deg,50deg);
-        }
-        #scale:hover{
-            transition: 3s;
-            transform: scale(2,2);
-        }
-        #translate:hover{
-            transition: 3s;
-            transform: translate(40px,20px);
-        }
-        .rgba{
-            background-color: rgba(242,24,24,0.5);
-        }
-        .lg{
-            background: linear-gradient(
-                40deg,
-                rgba(15,37,110,1)12%,
-                rgba(32,178,7,1)55%,
-                rgba(0,0,0,1)76%
-            );
-        }
-        .rg{
-            background: radial-gradient(
-                81% 95% at 49% 49%,
-                rgba(240,242,250,1))12%,
-                rgba(32,178,7,1)84%
-               
-            );
-        }
-    </style>
-</head>
-<body>
-    <div class="box"></div>
-    <div class="box1">single</div>
-    <div class="box2">Animation</div>
-    <div class="common">rotate
-        <img src="images/insta.png"width="200px" height="180" id="rotate">
-    </div>
-    <div class="common">skew
-        <img src="images/wtsapp.png"width="200px" height="180" id="skew">
-    </div>
-    <div class="common">scale
-        <img src="images/wtsapp.png"width="200px" height="180" id="scale">
-    </div>
-    <div class="common">translate
-        <img src="images/wtsapp.png"width="200px" height="180" id="translate">
-    </div>
-    <div class="common rgba">rgba</div>
-    <div class="common rgba">rgba</div>
-    <div class="common rgba">rgba</div>
-</body>
-</html>
+import numpy as np
+import random
+import time
+import matplotlib.pyplot as plt
+
+
+def create_board():
+    x = np.zeros((3, 3))
+    return x
+
+board = create_board()
+
+
+def place(board, player, position):
+    if board[position] == 0:
+        board[position] = player
+        return board
+
+
+def possibilities(board):
+    # it gives the indices wherever there are zeros in the form of 2 seperate
+    # arrays in a tuple.
+    # (array([0, 0, 1, 1, 1, 2, 2, 2]), array([1, 2, 0, 1, 2, 0, 1, 2]))
+    y = np.where(board == 0)
+    y = np.array(y)
+    z = list(map(tuple, np.transpose(y)))
+    # transpose it to get [0,1],[0,2],[1,0]
+    # ... and so on. Then using map function convert each of them to tuple.
+    # And keep it totally as a list.
+    return z
+
+
+def random_place(board, player):
+    position = random.choice(possibilities(board))
+    # print (position)
+    return place(board, player, position)
+
+board = random_place(board, 2)
+
+
+def row_win(board, player):
+    for i in range(3):
+        if(player == board[i][0]):
+            if((player == board[i][1]) and (player == board[i][2])):
+                print("True")
+            else:
+                print("False")
+        else:
+            print("False")
+           
+row_win(board, 1)
+
+
+def col_win(board, player):
+    for i in range(3):
+        if(player == board[0][i]):
+            if((player == board[1][i]) and (player == board[2][i])):
+                print("True")
+            else:
+                print("False")
+        else:
+            print("False")
+           
+col_win(board, 1)
+
+
+def diag_win(board, player):
+    z = 0
+    for i in range(3):
+        if(player == board[i][i]):
+            z += 1
+    if(z == len(board)):
+        print("True")
+    else:
+        print("False")
+     
+diag_win(board, 1)
+
+
+# Evaluate
+def evaluate(board):
+    winner = 0
+    for player in [1, 2]:
+        # Check if `row_win`, `col_win`, or `diag_win` apply.
+        # if so, store `player` as `winner`.
+        if (row_win(board, player) is True or col_win(board, player) is True):
+            winner = player
+        if(diag_win(board, player) is True):
+            winner = player
+    if np.all(board != 0) and winner == 0:
+        winner = -1
+    return winner
+
+evaluate(board)
+
+
+# play_game()
+def play_game():
+    
+    board = create_board()
+    if(0 in board):
+        player = 1
+        random_place(board, player)
+        z = evaluate(board)
+        player = 2
+    return z
+
+
+# plot
+R = 1000
+ty = []
+r = []
+s = time.time()
+for i in range(R):
+    z = play_game()
+    r.append(z)
+
+e = time.time()
+c = e-s
+print(c)
+
+x = [r[j] for j in range(R)]
+plt.hist(x)
+plt.show()
+
+# play strategic
+def play_strategic_game():
+    board, winner = create_board(), 0
+    board[1, 1] = 1
+    while winner == 0:
+        for player in [2, 1]:
+            # use `random_place` to play a game, and store as `board`.
+            board = random_place(board, player)
+            # use `evaluate(board)`, and store as `winner`.
+            winner = evaluate(board)
+            if winner != 0:
+                break
+    return winner
+
+play_strategic_game()
+
+
+# plotting play-strategic-game
+# write your code here!
+R = 1000
+s = time.time()
+z = []
+for i in range(R):
+    k = play_strategic_game()
+    z.append(k)
+
+e = time.time()
+
+x = [z[j] for j in range(R)]
+plt.hist(x)
+plt.show()

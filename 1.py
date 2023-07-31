@@ -1,170 +1,156 @@
-from random import choice
-from turtle import *
-
-from freegames import floor, vector
-
-state = {'score': 0}
-path = Turtle(visible=False)
-writer = Turtle(visible=False)
-aim = vector(5, 0)
-pacman = vector(-40, -80)
-ghosts = [
-    [vector(-180, 160), vector(5, 0)],
-    [vector(-180, -160), vector(0, 5)],
-    [vector(100, 160), vector(0, -5)],
-    [vector(100, -160), vector(-5, 0)],
-]
-# fmt: off
-tiles = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-    0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0,
-    0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-]
-# fmt: on
+import numpy as np
+import random
+import time
+import matplotlib.pyplot as plt
 
 
-def square(x, y):
-    """Draw square using path at (x, y)."""
-    path.up()
-    path.goto(x, y)
-    path.down()
-    path.begin_fill()
+def create_board():
+    x = np.zeros((3, 3))
+    return x
 
-    for count in range(4):
-        path.forward(20)
-        path.left(90)
-
-    path.end_fill()
+board = create_board()
 
 
-def offset(point):
-    """Return offset of point in tiles."""
-    x = (floor(point.x, 20) + 200) / 20
-    y = (180 - floor(point.y, 20)) / 20
-    index = int(x + y * 20)
-    return index
+def place(board, player, position):
+    if board[position] == 0:
+        board[position] = player
+        return board
 
 
-def valid(point):
-    """Return True if point is valid in tiles."""
-    index = offset(point)
-
-    if tiles[index] == 0:
-        return False
-
-    index = offset(point + 19)
-
-    if tiles[index] == 0:
-        return False
-
-    return point.x % 20 == 0 or point.y % 20 == 0
+def possibilities(board):
+    # it gives the indices wherever there are zeros in the form of 2 seperate
+    # arrays in a tuple.
+    # (array([0, 0, 1, 1, 1, 2, 2, 2]), array([1, 2, 0, 1, 2, 0, 1, 2]))
+    y = np.where(board == 0)
+    y = np.array(y)
+    z = list(map(tuple, np.transpose(y)))
+    # transpose it to get [0,1],[0,2],[1,0]
+    # ... and so on. Then using map function convert each of them to tuple.
+    # And keep it totally as a list.
+    return z
 
 
-def world():
-    """Draw world using path."""
-    bgcolor('black')
-    path.color('blue')
+def random_place(board, player):
+    position = random.choice(possibilities(board))
+    # print (position)
+    return place(board, player, position)
 
-    for index in range(len(tiles)):
-        tile = tiles[index]
-
-        if tile > 0:
-            x = (index % 20) * 20 - 200
-            y = 180 - (index // 20) * 20
-            square(x, y)
-
-            if tile == 1:
-                path.up()
-                path.goto(x + 10, y + 10)
-                path.dot(2, 'white')
+board = random_place(board, 2)
 
 
-def move():
-    """Move pacman and all ghosts."""
-    writer.undo()
-    writer.write(state['score'])
-
-    clear()
-
-    if valid(pacman + aim):
-        pacman.move(aim)
-
-    index = offset(pacman)
-
-    if tiles[index] == 1:
-        tiles[index] = 2
-        state['score'] += 1
-        x = (index % 20) * 20 - 200
-        y = 180 - (index // 20) * 20
-        square(x, y)
-
-    up()
-    goto(pacman.x + 10, pacman.y + 10)
-    dot(20, 'yellow')
-
-    for point, course in ghosts:
-        if valid(point + course):
-            point.move(course)
+def row_win(board, player):
+    for i in range(3):
+        if(player == board[i][0]):
+            if((player == board[i][1]) and (player == board[i][2])):
+                print("True")
+            else:
+                print("False")
         else:
-            options = [
-                vector(5, 0),
-                vector(-5, 0),
-                vector(0, 5),
-                vector(0, -5),
-            ]
-            plan = choice(options)
-            course.x = plan.x
-            course.y = plan.y
-
-        up()
-        goto(point.x + 10, point.y + 10)
-        dot(20, 'red')
-
-    update()
-
-    for point, course in ghosts:
-        if abs(pacman - point) < 20:
-            return
-
-    ontimer(move, 100)
+            print("False")
+           
+row_win(board, 1)
 
 
-def change(x, y):
-    """Change pacman aim if valid."""
-    if valid(pacman + vector(x, y)):
-        aim.x = x
-        aim.y = y
+def col_win(board, player):
+    for i in range(3):
+        if(player == board[0][i]):
+            if((player == board[1][i]) and (player == board[2][i])):
+                print("True")
+            else:
+                print("False")
+        else:
+            print("False")
+           
+col_win(board, 1)
 
 
-setup(420, 420, 370, 0)
-hideturtle()
-tracer(False)
-writer.goto(160, 160)
-writer.color('white')
-writer.write(state['score'])
-listen()
-onkey(lambda: change(5, 0), 'Right')
-onkey(lambda: change(-5, 0), 'Left')
-onkey(lambda: change(0, 5), 'Up')
-onkey(lambda: change(0, -5), 'Down')
-world()
-move()
-done()
+def diag_win(board, player):
+    z = 0
+    for i in range(3):
+        if(player == board[i][i]):
+            z += 1
+    if(z == len(board)):
+        print("True")
+    else:
+        print("False")
+     
+diag_win(board, 1)
 
+
+# Evaluate
+def evaluate(board):
+    winner = 0
+    for player in [1, 2]:
+        # Check if `row_win`, `col_win`, or `diag_win` apply.
+        # if so, store `player` as `winner`.
+        if (row_win(board, player) is True or col_win(board, player) is True):
+            winner = player
+        if(diag_win(board, player) is True):
+            winner = player
+    if np.all(board != 0) and winner == 0:
+        winner = -1
+    return winner
+
+evaluate(board)
+
+
+# play_game()
+def play_game():
+    
+    board = create_board()
+    if(0 in board):
+        player = 1
+        random_place(board, player)
+        z = evaluate(board)
+        player = 2
+    return z
+
+
+# plot
+R = 1000
+ty = []
+r = []
+s = time.time()
+for i in range(R):
+    z = play_game()
+    r.append(z)
+
+e = time.time()
+c = e-s
+print(c)
+
+x = [r[j] for j in range(R)]
+plt.hist(x)
+plt.show()
+
+# play strategic
+def play_strategic_game():
+    board, winner = create_board(), 0
+    board[1, 1] = 1
+    while winner == 0:
+        for player in [2, 1]:
+            # use `random_place` to play a game, and store as `board`.
+            board = random_place(board, player)
+            # use `evaluate(board)`, and store as `winner`.
+            winner = evaluate(board)
+            if winner != 0:
+                break
+    return winner
+
+play_strategic_game()
+
+
+# plotting play-strategic-game
+# write your code here!
+R = 1000
+s = time.time()
+z = []
+for i in range(R):
+    k = play_strategic_game()
+    z.append(k)
+
+e = time.time()
+
+x = [z[j] for j in range(R)]
+plt.hist(x)
+plt.show()
